@@ -1,39 +1,69 @@
 const express = require('express');
-const axios = require('axios');
 const app = express();
 const Config = require('./config');
+const Playlist = require('./playlist');
 
 const config = new Config();
 const port = config.getPort();
-const api_key = config.getYTApiKey();
-const api_base_url = config.getYTBaseApiUrl();
 
 
-// Define a route to call the Python API
 app.get('/playlist', async(req, res) => {
     try {
-        // Make a request
+        const playlist_id = req.query.id;
+        if (!playlist_id) {
+            res.status(400).json({error: 'id parameters is missing'});
+        }
+        const playlist = new Playlist(playlist_id);
+        var response = await playlist.getPlaylistInfo();
+        res.json(response);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({error: 'An error occurred while calling the API'});
+    }
+});
+
+app.get('/playlist/items', async(req, res) => {
+    try {
         const playlist_id = req.query.id
         console.log(`Playlist ID ${playlist_id} received`);
-
-        if (!playlist_id)
+        if (!playlist_id) {
             res.status(400).json({error: 'id parameter is missing'});
+        }
 
-        console.log(`Base URL: ${api_base_url}`);
-        const playlist_url = `${api_base_url}/playlistItems?part=snippet&maxResults=50&playlistId=${playlist_id}&key=${api_key}`;
-        console.log(`URL called: ${playlist_url}`);
+        const playlist = new Playlist(playlist_id);
+        const playlist_items = await playlist.getPlaylistItems();
 
-        const response = await axios.get(playlist_url);
-        const playlist_items = response.data.items;
-
-        playlist_items.forEach((item, index) => {
-            console.log(`Video ${index+1}: ${item.snippet.tittle}`);
+        const playlist_response = playlist_items.map((item) => {
+            return {
+                id : item.snippet.resourceId.videoId,
+                title: item.snippet.title
+            };
         });
 
-        res.json(playlist_items);
+        res.json(playlist_response);
     } catch(error) {
         console.error(error);
         res.status(500).json({error : 'An error occurred while calling the API'});
+    }
+});
+
+app.get('/sr', async(req, res) => {
+    try {
+        const playlist_id = req.query.id;
+        if(!playlist_id) {
+            res.status(400).json({error: 'Id parameter is missing'});
+        }
+
+        const playlist = new Playlist(playlist_id);
+        const playlist_items = await playlist.getPlaylistItems();
+        
+        const sr_response = playlist_items.map((item) => {
+            return `!sr ${item.snippet.resourceId.videoId}`;
+        });
+        res.json(sr_response);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({error: 'An error occurred while calling the API'});
     }
 });
 
