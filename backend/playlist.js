@@ -37,7 +37,7 @@ class Playlist {
 
     async getTotalItems() {
         const playlist_info = await this.getPlaylistInfo();
-        return playlist_info.contentDetails.itemCount;
+        return playlist_info.items[0].contentDetails.itemCount;
     }
 }
 

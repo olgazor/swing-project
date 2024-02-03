@@ -1,0 +1,23 @@
+/* VideoList.css (create this file in the same directory as VideoList.js) */
+
+.video-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); /* Adjust the column width as needed */
+    gap: 20px; /* Adjust the gap between videos as needed */
+    list-style: none;
+    padding: 0;
+  }
+  
+  .video-container {
+    border: 1px solid #a6e22e;
+    padding: 10px;
+    text-align: center;
+  }
+  
+  .video-thumbnail {
+    max-width: 100%;
+    height: auto;
+  }
+  
+  /* Add more styles as needed */
+  
